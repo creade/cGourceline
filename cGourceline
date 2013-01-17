@@ -1,0 +1,25 @@
+#!/bin/sh
+IFS=$'\n'
+TAB=$'\t'
+
+LASTCHECKED=`date +"%s"`
+
+while true
+do
+    IGNORED=`git svn rebase`
+    PREFIXES=`git log --reverse --since $LASTCHECKED --pretty=format:"%H|%at|%an|"`
+    LASTCHECKED=`date +"%s"`
+    for i in $PREFIXES
+    do
+        SHA=`echo $i | cut -d '|' -f 1`
+        PREFIX=`echo $i | cut -d '|' -f 2-3`
+        SUFFIXES=`git show $SHA --pretty=format:"" --name-status`
+        for i in $SUFFIXES
+        do
+            SUFFIX=`echo $i| sed "s/$TAB/|/g"`
+            echo $PREFIX"|"$SUFFIX
+        done
+    done
+    sleep 30
+done
+
